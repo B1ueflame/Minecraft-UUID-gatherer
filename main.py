@@ -77,8 +77,8 @@ def main():
     while True:
         try:
             num_threads = int(input("Enter the number of threads (1-100) to use for processing (reccomended use less than num of proxies): "))
-            if not (1 <= num_threads <= 100):
-                raise ValueError("Number of threads must be between 1 and 100.")
+            if not (1 <= num_threads <= 1000):
+                raise ValueError("Number of threads must be between 1 and 1000.")
             break
         except ValueError as ve:
             print(f"Error: {ve}")
