@@ -46,9 +46,30 @@ def process_usernames_batch(usernames_batch, proxy):
                 print(f"Username: {profile['name']}, UUID: {profile['id']}")
             write_uuids_to_file("gathered_uuids.txt", uuids)
         else:
-            print("No valid Minecraft profiles found.")
+            print("No valid Minecraft profiles found for the provided usernames.")
     except Exception as e:
-        print(f"Error getting UUIDs: {e}")
+        print(f"Error processing batch with proxy {proxy}: {e}")
+        # Log the error or handle it appropriately
+
+        # Identify which usernames caused the error
+        error_indices = []
+        for index, username in enumerate(usernames_batch):
+            try:
+                get_uuids([username], proxy)  # Test each username individually
+            except Exception:
+                error_indices.append(index)
+
+        # Exclude usernames that caused errors from the batch
+        usernames_to_retry = [usernames_batch[i] for i in range(len(usernames_batch)) if i not in error_indices]
+
+        if usernames_to_retry:
+            print("Retrying with remaining usernames in the batch:")
+            process_usernames_batch(usernames_to_retry, proxy)
+        else:
+            print("All usernames in the batch encountered errors.")
+
+        # Log or handle the failed usernames appropriately
+
 
 def main():
     proxies = get_proxies_from_file("proxy.txt")
@@ -57,7 +78,7 @@ def main():
         try:
             num_threads = int(input("Enter the number of threads (1-100) to use for processing (reccomended use less than num of proxies): "))
             if not (1 <= num_threads <= 100):
-                raise ValueError("Number of threads must be between 1 and 10.")
+                raise ValueError("Number of threads must be between 1 and 100.")
             break
         except ValueError as ve:
             print(f"Error: {ve}")
